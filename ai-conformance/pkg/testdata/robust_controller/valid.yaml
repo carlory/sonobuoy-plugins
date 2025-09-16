@@ -1,0 +1,29 @@
+# Please modify this file to provide a valid instance of a custom resource.
+apiVersion: ray.io/v1
+kind: RayCluster
+metadata:
+  name: raycluster-head-only
+spec:
+  rayVersion: "2.9.0"
+  enableInTreeAutoscaling: false
+  headGroupSpec:
+    serviceType: ClusterIP
+    rayStartParams:
+      dashboard-host: "0.0.0.0"
+    template:
+      spec:
+        containers:
+          - name: ray-head
+            image: rayproject/ray:2.9.0
+            resources:
+              requests:
+                cpu: "1"
+                memory: "2Gi"
+              limits:
+                cpu: "1"
+                memory: "2Gi"
+            ports:
+              - containerPort: 6379   # GCS
+              - containerPort: 8265   # Dashboard
+              - containerPort: 10001  # Ray Client
+  workerGroupSpecs: []

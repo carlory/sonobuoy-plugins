@@ -1,0 +1,14 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: llm-d-inference-sim
+  labels:
+    release: kube-prometheus-stack   # Must be the same as the Prometheus
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: llm-d-inference-sim
+  endpoints:
+    - port: http
+      interval: 5s
+      path: /metrics

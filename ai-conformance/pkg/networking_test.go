@@ -10,7 +10,6 @@ import (
 )
 
 // How we might test it: Verify that all the gateway.networking.k8s.io/v1 Gateway API resources are enabled.
-// Installation guide: https://gateway-api.sigs.k8s.io/guides/#install-standard-channel
 //
 // See https://docs.google.com/document/d/1hXoSdh9FEs13Yde8DivCYjjXyxa7j4J8erjZPEGWuzc/edit?tab=t.0
 func TestAiInference(t *testing.T) {
@@ -20,9 +19,8 @@ func TestAiInference(t *testing.T) {
 	f := features.New("ai_inference").
 		WithLabel("type", "networking").
 		WithLabel("id", "ai_inference").
-		WithLabel("description", description).
 		WithLabel("level", "MUST").
-		Assess("Verify that all the gateway.networking.k8s.io/v1 Gateway API resources are enabled.", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		AssessWithDescription("Verify that all the gateway.networking.k8s.io/v1 Gateway API resources are enabled.", description, func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			gvks := []schema.GroupVersionKind{
 				{Group: "gateway.networking.k8s.io", Version: "v1", Kind: "GatewayClass"},
 				{Group: "gateway.networking.k8s.io", Version: "v1", Kind: "Gateway"},
@@ -32,12 +30,14 @@ func TestAiInference(t *testing.T) {
 			}
 
 			for _, gvk := range gvks {
-				found, err := IsCrdAvailable(cfg.Client().RESTConfig(), gvk.GroupVersion().String(), gvk.Kind)
+				found, err := IsCrdAvailable(cfg.Client().RESTConfig(), gvk)
 				if err != nil {
-					t.Fatalf("Failed to check %s: %v", gvk, err)
+					t.Errorf("Failed to check %s: %v", gvk, err)
+					return ctx
 				}
 				if !found {
-					t.Fatalf("missing %s", gvk)
+					t.Errorf("missing %s", gvk)
+					return ctx
 				}
 			}
 			t.Logf("found all the gateway.networking.k8s.io/v1 Gateway API resources: %v", gvks)

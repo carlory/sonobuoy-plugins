@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  generateName: gpu-pod-
+spec:
+  restartPolicy: Always
+  containers:
+    - name: gpu
+      image: docker.m.daocloud.io/library/python:bullseye
+      resources:
+        limits:
+          nvidia.com/gpu: 1
+      command: ["sleep", "infinity"]

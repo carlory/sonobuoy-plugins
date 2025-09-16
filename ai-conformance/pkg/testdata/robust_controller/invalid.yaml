@@ -1,0 +1,2 @@
+# Please modify this file to provide an invalid instance of a custom resource.
+# It should be rejected by the admission webhook if it is installed.

@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: k6-script
+data:
+  script.js: |
+    import http from 'k6/http';
+    import { check, sleep } from 'k6';
+
+    // Read parameters from environment variables (default: 10 VU, 30s)
+    const vus = __ENV.VUS ? parseInt(__ENV.VUS) : 10;
+    const duration = __ENV.DURATION || '30s';
+    const sleepTime = __ENV.SLEEP ? parseFloat(__ENV.SLEEP) : 1;
+    const target = __ENV.TARGET || 'http://vllm-llama3-8b-instruct:8000';
+    const model = __ENV.MODEL || 'meta-llama/Llama-3.1-8B-Instruct';
+
+    export let options = {
+      vus: vus,
+      duration: duration,
+    };
+
+    export default function () {
+      let res = http.post(
+        `${target}/v1/chat/completions`,
+        JSON.stringify({
+          model: model,
+          messages: [
+            { role: "user", content: "Hello!" }
+          ]
+        }),
+        { headers: { 'Content-Type': 'application/json' } }
+      );
+      check(res, { 'status is 200': (r) => r.status === 200 });
+      sleep(sleepTime);
+    }
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: loadtest
+spec:
+  template:
+    spec:
+      containers:
+      - name: k6
+        image: docker.io/grafana/k6:latest
+        command: ["k6", "run", "/scripts/script.js"]
+        env:
+        - name: VUS
+          value: "100"          # Number of concurrent users
+        - name: DURATION
+          value: "2m"          # Load test duration
+        - name: SLEEP
+          value: "0.1"         # Pause time after each request
+        - name: TARGET
+          value: "http://llm-d-inference-sim:8001"   # Load test target service
+        - name: MODEL
+          value: "model1"
+        volumeMounts:
+        - name: k6-script-volume
+          mountPath: /scripts
+      restartPolicy: Never
+      volumes:
+      - name: k6-script-volume
+        configMap:
+          name: k6-script
+  backoffLimit: 0

@@ -11,8 +11,6 @@ spec:
   image: ghcr.io/carlory/sonobuoy-plugins/ai-conformance:v0.1.0
   imagePullPolicy: Always
   env:
-  - name: NS_PREFIX
-    value: ai-conformance
   - name: SONOBUOY_PROGRESS_PORT
     value: "8099"
   name: plugin

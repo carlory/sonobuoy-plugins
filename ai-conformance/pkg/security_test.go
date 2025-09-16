@@ -22,9 +22,8 @@ func TestSecureAcceleratorAccess(t *testing.T) {
 	f := features.New("secure_accelerator_access").
 		WithLabel("type", "security").
 		WithLabel("id", "secure_accelerator_access").
-		WithLabel("description", description).
 		WithLabel("level", "MUST").
-		Assess(description, func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		AssessWithDescription("secure_accelerator_access", description, func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			return ctx
 		})
 

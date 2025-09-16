@@ -2,7 +2,6 @@ package pkg
 
 import (
 	"context"
-	"encoding/json"
 	"testing"
 
 	"k8s.io/client-go/discovery"
@@ -19,22 +18,21 @@ func TestDraSupport(t *testing.T) {
 	f := features.New("dra_support").
 		WithLabel("type", "accelerators").
 		WithLabel("id", "dra_support").
-		WithLabel("description", description).
 		WithLabel("level", "MUST").
-		Assess("Verify that all the resource.k8s.io/v1 DRA API resources are enabled.", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		AssessWithDescription("Verify that all the resource.k8s.io/v1 DRA API resources are enabled.", description, func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			discoveryClient, err := discovery.NewDiscoveryClientForConfig(cfg.Client().RESTConfig())
 			if err != nil {
-				t.Fatalf("Failed to create discovery client: %v", err)
+				t.Errorf("Failed to create discovery client: %v", err)
+				return ctx
 			}
 			resources, err := discoveryClient.ServerResourcesForGroupVersion("resource.k8s.io/v1")
 			if err != nil {
-				t.Fatalf("the resource.k8s.io/v1 is not enabled: %v", err)
+				t.Errorf("the resource.k8s.io/v1 is not enabled: %v", err)
+				return ctx
 			}
 			if resources == nil {
-				t.Fatalf("no resources found in resource.k8s.io/v1")
-			} else {
-				data, _ := json.Marshal(resources)
-				t.Logf("found resources in resource.k8s.io/v1: %s", string(data))
+				t.Errorf("no resources found in resource.k8s.io/v1")
+				return ctx
 			}
 			return ctx
 		})

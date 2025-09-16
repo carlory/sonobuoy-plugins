@@ -1,0 +1,94 @@
+environment:
+  openshift: false
+  resourceReservationNamespace: runai-reservation
+
+devicePlugin:
+  image:
+    pullPolicy: Always
+    repository: ghcr.io/run-ai/fake-gpu-operator/device-plugin
+    tag: ""
+  resources: 
+    requests:
+      cpu: "100m"
+      memory: "100Mi"
+    limits:
+      cpu: "200m"
+      memory: "200Mi"
+
+statusUpdater:
+  image:
+    pullPolicy: Always
+    repository: ghcr.io/run-ai/fake-gpu-operator/status-updater
+    tag: ""
+  resources: 
+    requests:
+      cpu: "200m"
+      memory: "200Mi"
+    limits:
+      cpu: "400m"
+      memory: "400Mi"
+
+topologyServer:
+  image:
+    pullPolicy: Always
+    repository: ghcr.io/run-ai/fake-gpu-operator/topology-server
+    tag: ""
+  resources: 
+    requests:
+      cpu: "100m"
+      memory: "100Mi"
+    limits:
+      cpu: "200m"
+      memory: "200Mi"
+
+statusExporter:
+  image:
+    pullPolicy: Always
+    repository: ghcr.io/run-ai/fake-gpu-operator/status-exporter
+    tag: ""
+  resources: 
+    requests:
+      cpu: "100m"
+      memory: "100Mi"
+    limits:
+      cpu: "200m"
+      memory: "200Mi"
+  topologyMaxExportInterval: 10s
+
+kwokGpuDevicePlugin:
+  image:
+    pullPolicy: Always
+    repository: ghcr.io/run-ai/fake-gpu-operator/kwok-gpu-device-plugin
+    tag: ""
+  resources: 
+    requests:
+      cpu: "100m"
+      memory: "200Mi"
+    limits:
+      cpu: "200m"
+      memory: "400Mi"
+
+migFaker:
+  image:
+    pullPolicy: Always
+    repository: ghcr.io/run-ai/fake-gpu-operator/mig-faker
+    tag: ""
+
+ubuntu:
+  image:
+    repository: "ubuntu"
+    tag: "24.04"
+
+topology:
+  # nodePools is a map of node pool name to node pool configuration.
+  # Nodes are assigned to node pools based on the node pool label's value (key is configurable via nodePoolLabelKey).
+  # 
+  # For example, nodes that have the label "run.ai/simulated-gpu-node-pool: default"
+  # will be assigned to the "default" node pool.
+  nodePools:
+    default:
+      gpuProduct: Tesla-K80
+      gpuCount: 10
+      gpuMemory: 11441
+  nodePoolLabelKey: run.ai/simulated-gpu-node-pool
+  migStrategy: mixed
